@@ -1,0 +1,163 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Company {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  users     User[]
+  jobs      Job[]
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  name      String?
+  role      String   @default("RECRUITER") // RECRUITER, ADMIN
+  companyId String?
+  company   Company? @relation(fields: [companyId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Job {
+  id                 String             @id @default(uuid())
+  title              String
+  description        String
+  duration           Int                @default(30) // in minutes
+  difficulty         String             @default("INTERMEDIATE") // ENTRY, INTERMEDIATE, SENIOR, LEAD
+  interviewType      String             @default("FULL") // TECHNICAL, CODING, SYSTEM_DESIGN, BEHAVIORAL, FULL
+  evaluationCriteria String             @default("") // Custom rubric instructions
+  companyId          String
+  company            Company            @relation(fields: [companyId], references: [id])
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+  sessions           InterviewSession[]
+}
+
+model Candidate {
+  id         String             @id @default(uuid())
+  name       String
+  email      String             @unique
+  resumeUrl  String?
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  resumeData ResumeData?
+  sessions   InterviewSession[]
+}
+
+model ResumeData {
+  id          String    @id @default(uuid())
+  candidateId String    @unique
+  candidate   Candidate @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  education   String // JSON string or text
+  experience  String // JSON string or text
+  skills      String // Comma-separated list or JSON
+  projects    String // JSON string or text
+  languages   String? // Programming languages
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model InterviewSession {
+  id             String          @id @default(uuid())
+  jobId          String
+  job            Job             @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  candidateId    String
+  candidate      Candidate       @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  status         String          @default("NOT_STARTED") // NOT_STARTED, IN_PROGRESS, COMPLETED, EVALUATED
+  currentPhase   String          @default("INSTRUCTIONS") // INSTRUCTIONS, RESUME_Q, CODING, SYSTEM_DESIGN, BEHAVIORAL, FINISHED
+  isPractice     Boolean         @default(false)
+  isPlagiarised  Boolean         @default(false)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  startedAt      DateTime?
+  completedAt    DateTime?
+  questions      Question[]
+  answers        Answer[]
+  reports        Report[]
+  cheatingEvents CheatingEvent[]
+}
+
+model Question {
+  id          String           @id @default(uuid())
+  sessionId   String
+  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  phase       String // RESUME_Q, CODING, SYSTEM_DESIGN, BEHAVIORAL
+  text        String
+  codeContext String? // Code snippets if applicable
+  createdAt   DateTime         @default(now())
+  answers     Answer[]
+}
+
+model Answer {
+  id          String           @id @default(uuid())
+  sessionId   String
+  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  questionId  String
+  question    Question         @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  text        String // Speech transcript or code submission
+  codeOutputs String? // Compiles/runs logs if coding round
+  durationMs  Int              @default(0)
+  createdAt   DateTime         @default(now())
+  score       Score?
+}
+
+model Score {
+  id                  String   @id @default(uuid())
+  answerId            String   @unique
+  answer              Answer   @relation(fields: [answerId], references: [id], onDelete: Cascade)
+  technicalAccuracy   Int      @default(0) // Out of 10
+  depthOfKnowledge    Int      @default(0) // Out of 10
+  problemSolving      Int      @default(0) // Out of 10
+  communicationClarity Int      @default(0) // Out of 10
+  confidence          Int      @default(0) // Out of 10
+  feedback            String // Strengths, weaknesses, suggestions
+  idealAnswerSummary  String? // Expected answer summary
+  createdAt           DateTime @default(now())
+}
+
+model Report {
+  id                     String           @id @default(uuid())
+  sessionId              String           @unique
+  session                InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  overallScore           Float            @default(0.0) // 0-50
+  technicalScore         Float            @default(0.0)
+  codingScore            Float            @default(0.0)
+  communicationScore     Float            @default(0.0)
+  behavioralScore        Float            @default(0.0)
+  strengths              String // Text list
+  weaknesses             String // Text list
+  knowledgeGaps          String // Knowledge gaps
+  projectsDiscussion     String? // Resume projects review
+  recommendedLearning    String?
+  hiringRecommendation   String           @default("MAYBE") // YES, STRONG_YES, NO, MAYBE
+  recommendationConfidence Float            @default(0.0) // percentage 0-100
+  createdAt              DateTime         @default(now())
+}
+
+model CheatingEvent {
+  id          String           @id @default(uuid())
+  sessionId   String
+  session     InterviewSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  eventType   String // TAB_SWITCH, MULTIPLE_FACES, NO_FACE, BACKGROUND_NOISE, MULTIPLE_VOICES, COPY_PASTE, INACTIVITY
+  description String
+  timestamp   DateTime         @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  recipient String   @default("RECRUITER") // RECRUITER, CANDIDATE
+  email     String
+  subject   String
+  body      String
+  sent      Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
