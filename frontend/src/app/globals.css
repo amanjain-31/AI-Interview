@@ -343,12 +343,6 @@ option {
   display: none;
 }
 
-.cursor-glow-3 {
-  display: none;
-}
-
-@import "tailwindcss";
-
 :root {
   --background: #050816;
   --foreground: #f8fafc;
