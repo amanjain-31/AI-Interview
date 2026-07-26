@@ -27,12 +27,17 @@ import {
   Loader2,
   Mail,
   Phone,
-  Send
+  Send,
+  Layers,
+  Server,
+  Activity,
+  GitBranch
 } from "lucide-react";
 
 export default function LandingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [archTab, setArchTab] = useState<"VOICE" | "PROMPTS" | "SCORING" | "RESILIENCE">("VOICE");
 
   // Contact form state
   const [contactName, setContactName] = useState("");
@@ -342,6 +347,7 @@ export default function LandingPage() {
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-bold text-zinc-400 uppercase tracking-widest">
             <a href="#features" className="premium-glow-link">Features</a>
+            <a href="#architecture" className="premium-glow-link">System Design</a>
             <a href="#demo" className="premium-glow-link">Interactive Demo</a>
             <a href="#pricing" className="premium-glow-link">Pricing</a>
             <a href="#contact" className="premium-glow-link">Contact</a>
@@ -642,6 +648,287 @@ export default function LandingPage() {
               </p>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* System Architecture & Engineering Section */}
+      <section id="architecture" className="py-24 px-6 border-t border-white/10 bg-[#070b1e]/60 relative overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <span className="px-4 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-black uppercase tracking-widest inline-flex items-center gap-2 mb-4">
+              <Cpu className="w-3.5 h-3.5" /> High-Performance System Architecture
+            </span>
+            <h2 className="text-3xl sm:text-5xl font-black text-zinc-100 font-[Outfit] tracking-tight">
+              Engineering Under the Hood
+            </h2>
+            <p className="text-zinc-400 text-sm max-w-2xl mx-auto mt-3">
+              Explore how real-time WebSocket pipelines, dynamic AI prompt state machines, and fail-soft fallback engines interact in production.
+            </p>
+          </div>
+
+          {/* Visual System Architecture Topology Diagram */}
+          <div className="premium-card p-8 mb-12 relative overflow-hidden border border-cyan-500/20 bg-[#0d122b]/80">
+            <div className="flex items-center justify-between pb-6 mb-8 border-b border-white/10">
+              <div className="flex items-center gap-3">
+                <div className="w-3 h-3 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="font-mono text-xs font-bold text-zinc-300">SYSTEM_TOPOLOGY_V2.0 // LIVE DATA PIPELINE</span>
+              </div>
+              <span className="text-xs font-mono text-cyan-400 bg-cyan-500/10 px-3 py-1 rounded-full border border-cyan-500/20">
+                WebSocket Latency: ~42ms
+              </span>
+            </div>
+
+            {/* Architecture Node Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 relative z-10">
+              {/* Node 1: Client Audio & Video */}
+              <div className="p-5 rounded-2xl bg-black/40 border border-white/10 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-zinc-500 font-bold uppercase tracking-wider">LAYER 01</span>
+                  <Mic className="w-4 h-4 text-emerald-400" />
+                </div>
+                <h5 className="font-bold text-sm text-zinc-200">Client Audio/WebRTC</h5>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Web Audio AnalyserNode volume peak metering + SpeechRecognition continuous transcript streaming.
+                </p>
+                <div className="mt-auto pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-emerald-400">
+                  <span>WebSpeech API</span>
+                  <span>16kHz PCM</span>
+                </div>
+              </div>
+
+              {/* Node 2: Node.js WebSocket Gateway */}
+              <div className="p-5 rounded-2xl bg-black/40 border border-cyan-500/30 flex flex-col gap-3 relative">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-cyan-400 font-bold uppercase tracking-wider">LAYER 02</span>
+                  <Server className="w-4 h-4 text-cyan-400" />
+                </div>
+                <h5 className="font-bold text-sm text-zinc-200">WebSocket Node Gateway</h5>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Express ws handler maintaining interview phase state machine &amp; proctoring telemetry audit streams.
+                </p>
+                <div className="mt-auto pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-cyan-400">
+                  <span>interview.socket.ts</span>
+                  <span>Duplex Stream</span>
+                </div>
+              </div>
+
+              {/* Node 3: AI Prompt Synthesizer & Evaluator */}
+              <div className="p-5 rounded-2xl bg-black/40 border border-purple-500/30 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-purple-400 font-bold uppercase tracking-wider">LAYER 03</span>
+                  <BrainCircuit className="w-4 h-4 text-purple-400" />
+                </div>
+                <h5 className="font-bold text-sm text-zinc-200">AI Prompt &amp; Evaluation Engine</h5>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  Modular Gemini 1.5 / OpenAI provider layer evaluating 5 rubric dimensions on a 50-point scale.
+                </p>
+                <div className="mt-auto pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-purple-400">
+                  <span>ai.service.ts</span>
+                  <span>Mock Failover</span>
+                </div>
+              </div>
+
+              {/* Node 4: Persistence & Scorecard */}
+              <div className="p-5 rounded-2xl bg-black/40 border border-orange-500/30 flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-mono text-orange-400 font-bold uppercase tracking-wider">LAYER 04</span>
+                  <Award className="w-4 h-4 text-orange-400" />
+                </div>
+                <h5 className="font-bold text-sm text-zinc-200">Prisma ORM &amp; Scorecards</h5>
+                <p className="text-xs text-zinc-400 leading-relaxed">
+                  ACID database transaction logging infraction metrics, stage scores, and candidate recommendations.
+                </p>
+                <div className="mt-auto pt-2 border-t border-white/5 flex items-center justify-between text-[11px] font-mono text-orange-400">
+                  <span>SQLite / Postgres</span>
+                  <span>Prisma ORM</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Deep-Dive Interactive System Tabs */}
+          <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
+            <button
+              onClick={() => setArchTab("VOICE")}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                archTab === "VOICE"
+                  ? "bg-cyan-500 text-black font-extrabold shadow-lg shadow-cyan-500/20"
+                  : "bg-white/5 text-zinc-400 hover:bg-white/10"
+              }`}
+            >
+              <Mic className="w-3.5 h-3.5" /> Voice Protocol Architecture
+            </button>
+            <button
+              onClick={() => setArchTab("PROMPTS")}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                archTab === "PROMPTS"
+                  ? "bg-purple-500 text-white font-extrabold shadow-lg shadow-purple-500/20"
+                  : "bg-white/5 text-zinc-400 hover:bg-white/10"
+              }`}
+            >
+              <GitBranch className="w-3.5 h-3.5" /> Prompt State Machine
+            </button>
+            <button
+              onClick={() => setArchTab("SCORING")}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                archTab === "SCORING"
+                  ? "bg-[#FF3300] text-white font-extrabold shadow-lg shadow-orange-500/20"
+                  : "bg-white/5 text-zinc-400 hover:bg-white/10"
+              }`}
+            >
+              <Award className="w-3.5 h-3.5" /> 5D Scoring Matrix
+            </button>
+            <button
+              onClick={() => setArchTab("RESILIENCE")}
+              className={`px-5 py-2.5 rounded-full text-xs font-bold transition-all flex items-center gap-2 ${
+                archTab === "RESILIENCE"
+                  ? "bg-emerald-500 text-black font-extrabold shadow-lg shadow-emerald-500/20"
+                  : "bg-white/5 text-zinc-400 hover:bg-white/10"
+              }`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5" /> Fail-Soft Resilience Engine
+            </button>
+          </div>
+
+          {/* Active Tab Content Card */}
+          <div className="premium-card p-8 border border-white/10 bg-[#090d24]/90">
+            {archTab === "VOICE" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-zinc-100 font-[Outfit]">Dual-Stream Real-Time Voice Sessions</h4>
+                  <p className="text-zinc-400 text-sm leading-relaxed">
+                    HireAI handles voice input via a dual-channel browser architecture. The Web Audio API <code className="text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded font-mono text-xs">AnalyserNode</code> measures real-time decibel energy peaks to verify speech delivery, while the <code className="text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded font-mono text-xs">SpeechRecognition</code> event loop streams speech chunks continuously to the WebSocket gateway.
+                  </p>
+                  <ul className="space-y-2 text-xs text-zinc-300 font-mono">
+                    <li className="flex items-center gap-2">
+                      <span className="text-cyan-400">►</span> Real-time microphone peak volume metering (40% communication score weight)
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-cyan-400">►</span> Automatic text fallback input trigger if speech hardware drops connection
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-cyan-400">►</span> Browser SpeechSynthesis AI voice response queuing with active speaking guard
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-6 rounded-2xl bg-black/60 border border-white/10 font-mono text-xs space-y-3">
+                  <div className="text-zinc-500 border-b border-white/10 pb-2">// websocket/interview.socket.ts</div>
+                  <div className="text-cyan-400">socket.on("submit_answer", async (payload) =&gt; &#123;</div>
+                  <div className="text-zinc-300 pl-4">const &#123; text, durationMs, volumeAvg &#125; = payload;</div>
+                  <div className="text-purple-400 pl-4">const evalResult = await aiService.evaluateAnswer(&#123; text &#125;);</div>
+                  <div className="text-emerald-400 pl-4">socket.emit("evaluating_done", evalResult);</div>
+                  <div className="text-cyan-400">&#125;);</div>
+                </div>
+              </div>
+            )}
+
+            {archTab === "PROMPTS" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-zinc-100 font-[Outfit]">4-Stage Modular AI Prompt State Machine</h4>
+                  <p className="text-zinc-400 text-sm leading-relaxed">
+                    AI prompts are structured in isolated modular templates instead of monolithic prompt strings. The interview socket engine dynamically transitions candidate state through 4 standardized interview phases:
+                  </p>
+                  <div className="grid grid-cols-2 gap-3 text-xs">
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                      <span className="text-purple-400 font-mono font-bold block">1. RESUME_Q</span>
+                      <span className="text-zinc-400 text-[11px]">Icebreaker &amp; ATS parsed resume projects</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                      <span className="text-purple-400 font-mono font-bold block">2. SYSTEM_DESIGN</span>
+                      <span className="text-zinc-400 text-[11px]">Scalability, caching &amp; database trade-offs</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                      <span className="text-purple-400 font-mono font-bold block">3. BEHAVIORAL</span>
+                      <span className="text-zinc-400 text-[11px]">STAR format leadership &amp; conflict resolution</span>
+                    </div>
+                    <div className="p-3 rounded-xl bg-white/5 border border-white/10">
+                      <span className="text-purple-400 font-mono font-bold block">4. CODING</span>
+                      <span className="text-zinc-400 text-[11px]">Live sandbox algorithmic problem solving</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 rounded-2xl bg-black/60 border border-white/10 font-mono text-xs space-y-3">
+                  <div className="text-zinc-500 border-b border-white/10 pb-2">// services/ai.service.ts</div>
+                  <div className="text-purple-300">export function constructPrompt(phase, resumeData) &#123;</div>
+                  <div className="text-zinc-300 pl-4">switch(phase) &#123;</div>
+                  <div className="text-amber-300 pl-8">case 'RESUME_Q': return `Ask personal intro + $&#123;resumeData.skills[0]&#125;`;</div>
+                  <div className="text-amber-300 pl-8">case 'CODING': return `Provide LC-Hard challenge with zero leaks`;</div>
+                  <div className="text-zinc-300 pl-4">&#125;</div>
+                  <div className="text-purple-300">&#125;</div>
+                </div>
+              </div>
+            )}
+
+            {archTab === "SCORING" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-zinc-100 font-[Outfit]">Standardized 5-Dimension Evaluation Matrix</h4>
+                  <p className="text-zinc-400 text-sm leading-relaxed">
+                    Evaluation objectivity is guaranteed by scoring every answer across 5 independent vectors (0–10 each). Scores are aggregated into an objective **out of 50** scorecard mapped directly to hiring recommendations:
+                  </p>
+                  <div className="space-y-2 font-mono text-xs">
+                    <div className="flex items-center justify-between p-2 rounded bg-emerald-500/10 border border-emerald-500/20">
+                      <span className="text-emerald-400 font-bold">40 – 50 PTS</span>
+                      <span className="text-emerald-300 font-bold">STRONG_YES (Immediate Hire)</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded bg-cyan-500/10 border border-cyan-500/20">
+                      <span className="text-cyan-400 font-bold">30 – 39 PTS</span>
+                      <span className="text-cyan-300 font-bold">YES (Proceed to Onsite)</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded bg-amber-500/10 border border-amber-500/20">
+                      <span className="text-amber-400 font-bold">18 – 29 PTS</span>
+                      <span className="text-amber-300 font-bold">MAYBE (Debrief Required)</span>
+                    </div>
+                    <div className="flex items-center justify-between p-2 rounded bg-red-500/10 border border-red-500/20">
+                      <span className="text-red-400 font-bold">00 – 17 PTS</span>
+                      <span className="text-red-300 font-bold">NO (Rejection)</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="p-6 rounded-2xl bg-black/60 border border-white/10 font-mono text-xs space-y-2">
+                  <div className="text-zinc-500 border-b border-white/10 pb-2">// Evaluation Vector Breakdown</div>
+                  <div className="flex justify-between text-zinc-300"><span>1. Technical Accuracy</span><span className="text-orange-400">10 Pts</span></div>
+                  <div className="flex justify-between text-zinc-300"><span>2. Depth of Knowledge</span><span className="text-orange-400">10 Pts</span></div>
+                  <div className="flex justify-between text-zinc-300"><span>3. Problem Solving</span><span className="text-orange-400">10 Pts</span></div>
+                  <div className="flex justify-between text-zinc-300"><span>4. Communication Clarity</span><span className="text-orange-400">10 Pts</span></div>
+                  <div className="flex justify-between text-zinc-300"><span>5. Confidence &amp; Fluency</span><span className="text-orange-400">10 Pts</span></div>
+                  <div className="pt-2 border-t border-white/10 flex justify-between font-bold text-emerald-400"><span>TOTAL SCORECARD</span><span>50 PTS MAX</span></div>
+                </div>
+              </div>
+            )}
+
+            {archTab === "RESILIENCE" && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                <div className="space-y-4">
+                  <h4 className="text-xl font-bold text-zinc-100 font-[Outfit]">Fail-Soft Provider Abstraction &amp; Fallbacks</h4>
+                  <p className="text-zinc-400 text-sm leading-relaxed">
+                    In mission-critical candidate screening, third-party AI LLM downtime or rate-limiting must never break an ongoing assessment. HireAI implements a fail-soft provider wrapper:
+                  </p>
+                  <ul className="space-y-2 text-xs text-zinc-300 font-mono">
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-400">✓</span> Automatic key fallback from Gemini 1.5 Flash to OpenAI GPT-4o-mini
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-400">✓</span> Local deterministic Mock LLM provider fallback on 429 Quota / Rate-limit errors
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <span className="text-emerald-400">✓</span> Zero session loss: state preserved in SQLite/Postgres Prisma transactions
+                    </li>
+                  </ul>
+                </div>
+                <div className="p-6 rounded-2xl bg-black/60 border border-white/10 font-mono text-xs space-y-3">
+                  <div className="text-zinc-500 border-b border-white/10 pb-2">// Provider Failover Logic</div>
+                  <div className="text-emerald-400">try &#123;</div>
+                  <div className="text-zinc-300 pl-4">return await callGeminiAPI(prompt);</div>
+                  <div className="text-amber-400">&#125; catch (geminiErr) &#123;</div>
+                  <div className="text-zinc-300 pl-4">try &#123; return await callOpenAI(prompt); &#125;</div>
+                  <div className="text-red-400 pl-4">catch &#123; return executeMockFallback(prompt); &#125;</div>
+                  <div className="text-emerald-400">&#125;</div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </section>

@@ -28,6 +28,7 @@ import {
   Shield,
   Briefcase,
   Layers,
+  GraduationCap,
   X
 } from "lucide-react";
 
@@ -219,12 +220,12 @@ export default function StudentDashboard() {
       <aside className="w-full md:w-64 bg-white/5 backdrop-blur-md border-b md:border-b-0 md:border-r border-white/10/60 p-6 flex flex-col justify-between z-10 backdrop-blur-md shrink-0">
         <div className="space-y-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF3300] to-[#FFB200] flex items-center justify-center">
-              <Bot className="w-4 h-4 text-zinc-100" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-500 to-emerald-400 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+              <GraduationCap className="w-4 h-4 text-black" />
             </div>
             <div>
-              <span className="font-extrabold text-sm text-zinc-100">HireAI Student</span>
-              <span className="text-[9px] block text-[#FF3300] font-extrabold tracking-wider uppercase leading-none mt-0.5">Mock Arena</span>
+              <span className="font-extrabold text-sm text-zinc-100">Student Arena</span>
+              <span className="text-[9px] block text-cyan-400 font-extrabold tracking-wider uppercase leading-none mt-0.5">Candidate Simulator</span>
             </div>
           </Link>
 
@@ -232,21 +233,21 @@ export default function StudentDashboard() {
             <div className="space-y-1.5 pt-2">
               <button 
                 onClick={() => setActiveTab("OVERVIEW")}
-                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "OVERVIEW" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "OVERVIEW" ? "bg-gradient-to-r from-cyan-500 to-emerald-400 text-black font-extrabold shadow-md shadow-cyan-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
               >
-                <Layers className="w-4 h-4" /> Overview Dashboard
+                <Layers className="w-4 h-4" /> Practice Overview
               </button>
               <button 
                 onClick={() => setActiveTab("PRACTICE")}
-                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "PRACTICE" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "PRACTICE" ? "bg-gradient-to-r from-cyan-500 to-emerald-400 text-black font-extrabold shadow-md shadow-cyan-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
               >
-                <Play className="w-4 h-4 fill-current" /> Start Mock Practice
+                <Play className="w-4 h-4 fill-current" /> Launch AI Mock Run
               </button>
               <button 
                 onClick={() => setActiveTab("HISTORY")}
-                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "HISTORY" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+                className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "HISTORY" ? "bg-gradient-to-r from-cyan-500 to-emerald-400 text-black font-extrabold shadow-md shadow-cyan-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
               >
-                <History className="w-4 h-4" /> Assessment History
+                <History className="w-4 h-4" /> Performance Scorecards
               </button>
             </div>
           )}

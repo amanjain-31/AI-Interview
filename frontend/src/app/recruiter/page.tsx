@@ -199,33 +199,33 @@ export default function RecruiterDashboard() {
       <aside className="w-full md:w-64 bg-white/5 backdrop-blur-md border-b md:border-b-0 md:border-r border-white/10/60 p-6 flex flex-col justify-between z-10 backdrop-blur-md shrink-0">
         <div className="space-y-8">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF3300] to-[#FFB200] flex items-center justify-center">
-              <Bot className="w-4 h-4 text-zinc-100" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-[#FF3300] to-[#FFB200] flex items-center justify-center shadow-lg shadow-orange-500/20">
+              <Briefcase className="w-4 h-4 text-white" />
             </div>
             <div>
-              <span className="font-extrabold text-sm text-zinc-100">HireAI Console</span>
-              <span className="text-[9px] block text-[#FF3300] font-extrabold tracking-wider uppercase leading-none mt-0.5">Recruiter Hub</span>
+              <span className="font-extrabold text-sm text-zinc-100">Recruiter Hub</span>
+              <span className="text-[9px] block text-[#FF3300] font-extrabold tracking-wider uppercase leading-none mt-0.5">Screening Control</span>
             </div>
           </Link>
 
           <div className="space-y-1.5 pt-2">
             <button 
               onClick={() => setActiveTab("ANALYTICS")}
-              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "ANALYTICS" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "ANALYTICS" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white font-extrabold shadow-md shadow-orange-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
             >
-              <TrendingUp className="w-4 h-4" /> Hiring Analytics
+              <TrendingUp className="w-4 h-4" /> Screening Analytics
             </button>
             <button 
               onClick={() => setActiveTab("OPENINGS")}
-              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "OPENINGS" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "OPENINGS" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white font-extrabold shadow-md shadow-orange-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
             >
-              <Briefcase className="w-4 h-4" /> Job Openings
+              <Briefcase className="w-4 h-4" /> Active Job Postings
             </button>
             <button 
               onClick={() => setActiveTab("CANDIDATES")}
-              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "CANDIDATES" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-white font-bold" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5 backdrop-blur-md/5 backdrop-blur-md"}`}
+              className={`w-full px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center gap-2.5 transition-all text-left ${activeTab === "CANDIDATES" ? "bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white font-extrabold shadow-md shadow-orange-500/20" : "text-zinc-400 hover:text-zinc-200 hover:bg-white/5"}`}
             >
-              <Users className="w-4 h-4" /> Candidate Funnel
+              <Users className="w-4 h-4" /> Candidate Proctor Funnel
             </button>
           </div>
         </div>
