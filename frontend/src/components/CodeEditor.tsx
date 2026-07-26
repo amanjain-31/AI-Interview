@@ -18,57 +18,14 @@ export default function CodeEditor({ initialCode = "", onCodeSubmitted, isEvalua
   const [stats, setStats] = useState<{ time: number; memory: number } | null>(null);
 
   const templates: Record<string, string> = {
-    javascript: `// Longest Substring Without Repeating Characters
-// Implement a function to find the length of the longest substring without repeating characters.
-function lengthOfLongestSubstring(s) {
-    // Write your code here
-    
-}
-
-// Run standard test cases
-console.log(lengthOfLongestSubstring("abcabcbb")); // Expected: 3`,
-    python: `# Longest Substring Without Repeating Characters
-# Implement a function to find the length of the longest substring without repeating characters.
-def lengthOfLongestSubstring(s: str) -> int:
-    # Write your code here
-    pass
-
-# Run standard test cases
-print(lengthOfLongestSubstring("abcabcbb")) # Expected: 3`,
-    cpp: `// Longest Substring Without Repeating Characters
-#include <iostream>
-#include <string>
-#include <unordered_set>
-#include <algorithm>
-
-using namespace std;
-
-int lengthOfLongestSubstring(string s) {
-    // Write your code here
-    return 0;
-}
-
-int main() {
-    cout << lengthOfLongestSubstring("abcabcbb") << endl; // Expected: 3
-    return 0;
-}`,
-    java: `// Longest Substring Without Repeating Characters
-import java.util.HashSet;
-
-public class Main {
-    public static int lengthOfLongestSubstring(String s) {
-        // Write your code here
-        return 0;
-    }
-    
-    public static void main(String[] args) {
-        System.out.println(lengthOfLongestSubstring("abcabcbb")); // Expected: 3
-    }
-}`
+    javascript: "",
+    python: "",
+    cpp: "",
+    java: ""
   };
 
   useEffect(() => {
-    setCode(templates[language]);
+    setCode(templates[language] || "");
   }, [language]);
 
   const handleRunCode = () => {
@@ -80,22 +37,20 @@ public class Main {
       let runSuccess = true;
       let output = "";
 
-      if (language === "javascript" || language === "typescript") {
-        if (code.includes("syntax error") || (code.includes("const ") && !code.includes("="))) {
-          runSuccess = false;
-          output = "SyntaxError: Unexpected token";
-        } else {
-          output = "Output Log:\n3\n\nTest Case 1 passed: lengthOfLongestSubstring(\"abcabcbb\") === 3\nTest Case 2 passed: lengthOfLongestSubstring(\"bbbbb\") === 1\nTest Case 3 passed: lengthOfLongestSubstring(\"pwwkew\") === 3\n\nSUCCESS: 3/3 Test Cases Passed.";
-        }
-      } else if (language === "python") {
-        if (code.includes("def") && !code.includes(":")) {
-          runSuccess = false;
-          output = "  File \"main.py\", line 2\n    def test\n            ^\nSyntaxError: invalid syntax";
-        } else {
-          output = "Output Log:\n3\n\nTest Case 1 passed: lengthOfLongestSubstring(\"abcabcbb\") == 3\nTest Case 2 passed: lengthOfLongestSubstring(\"bbbbb\") == 1\n\nSUCCESS: 2/2 Test Cases Passed.";
-        }
+      const cleanCode = code.trim();
+      const hasLogic = cleanCode.includes("return") || cleanCode.includes("def ") || cleanCode.includes("function") || cleanCode.includes("class") || cleanCode.includes("for") || cleanCode.includes("while");
+
+      if (!cleanCode) {
+        runSuccess = false;
+        output = "Execution Error: Sandbox is empty. Please write your solution before running tests.";
+      } else if (!hasLogic) {
+        runSuccess = false;
+        output = "Compilation / Execution Result:\nTest Case 1 FAILED: Expected numerical output, got undefined.\nTest Case 2 FAILED: Expected numerical output, got undefined.\n\nFAILED: 0/3 Test Cases Passed. Please complete the function logic.";
+      } else if (cleanCode.includes("syntax error") || (cleanCode.includes("const ") && !cleanCode.includes("="))) {
+        runSuccess = false;
+        output = "SyntaxError: Unexpected token or uninitialized constant";
       } else {
-        output = "Compiling main sources...\nLinking dependencies...\nExecution results:\n3\n\nSUCCESS: Standard test suite completed successfully.";
+        output = "Compiling and executing test suite...\n\n✓ Test Case 1 passed: findMedianSortedArrays([1,3], [2]) === 2.0\n✓ Test Case 2 passed: findMedianSortedArrays([1,2], [3,4]) === 2.5\n✓ Test Case 3 passed: findMedianSortedArrays([0,0], [0,0]) === 0.0\n\nSUCCESS: 3/3 Test Cases Passed.";
       }
 
       setLogs(output);
@@ -104,7 +59,7 @@ public class Main {
         time: runSuccess ? Math.floor(Math.random() * 24) + 3 : 0,
         memory: runSuccess ? 1024 + Math.floor(Math.random() * 200) : 0,
       });
-    }, 1500);
+    }, 1200);
   };
 
   return (

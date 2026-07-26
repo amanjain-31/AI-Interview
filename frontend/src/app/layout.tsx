@@ -36,7 +36,6 @@ export default function RootLayout({
     >
       <body className="min-h-full bg-transparent text-white">
         <div className="page-shell">
-          <CursorGlowBackground />
           <div className="relative z-10 min-h-screen">{children}</div>
         </div>
       </body>

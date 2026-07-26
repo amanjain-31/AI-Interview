@@ -394,75 +394,83 @@ export class AIService {
   private static mockEvaluate(answer: string, phase: string): any {
     const cleanAnswer = answer.trim().toLowerCase();
     
-    // Heuristics for poor answers
+    // Heuristics for poor or empty answers
     const isTimeout = cleanAnswer.includes("timeout") || cleanAnswer.includes("skipped") || cleanAnswer.includes("[no response") || cleanAnswer.includes("no response");
     const isDonotKnow = cleanAnswer.includes("don't know") || cleanAnswer.includes("dont know") || cleanAnswer.includes("no idea") || cleanAnswer.includes("pass") || cleanAnswer.includes("skip") || cleanAnswer.includes("wrong answer") || cleanAnswer.includes("sorry") || cleanAnswer.includes("i do not know");
-    const isTooShort = cleanAnswer.length < 15;
+    const isTooShort = cleanAnswer.length < 20;
     
     if (isTimeout || isDonotKnow || isTooShort) {
       return {
         technicalAccuracy: 1,
         depthOfKnowledge: 1,
         problemSolving: 1,
-        communicationClarity: 1,
+        communicationClarity: 2,
         confidence: 1,
-        feedback: "The candidate failed to provide a meaningful explanation. The response was either empty, skipped, or indicated a lack of understanding.",
-        idealAnswerSummary: "An ideal response would explain standard principles, cover core architecture blocks, and analyze relevant runtime details."
+        feedback: "The candidate response was too brief, skipped, or indicated a lack of familiarity with the requested technical concept.",
+        idealAnswerSummary: "An ideal response would explain the fundamental concepts, outline technical trade-offs, and provide a concrete example."
+      };
+    }
+
+    // Moderate/Short answer evaluation (20 - 60 chars)
+    if (cleanAnswer.length < 60) {
+      return {
+        technicalAccuracy: 4,
+        depthOfKnowledge: 3,
+        problemSolving: 4,
+        communicationClarity: 5,
+        confidence: 4,
+        feedback: "The candidate answered briefly. While the direction is generally acceptable, it lacked essential technical depth, trade-off analysis, and specific implementation details.",
+        idealAnswerSummary: "A comprehensive answer should detail architectural choices, runtime complexities, and specific code/system design principles."
       };
     }
 
     // Heuristics for CODING
     if (phase === "CODING" || cleanAnswer.includes("submitted code") || cleanAnswer.includes("function") || cleanAnswer.includes("def ")) {
-      const containsCodeKeywords = cleanAnswer.includes("function") || cleanAnswer.includes("def ") || cleanAnswer.includes("return") || cleanAnswer.includes("let ") || cleanAnswer.includes("const ") || cleanAnswer.includes("var ") || cleanAnswer.includes("{") || cleanAnswer.includes(";");
+      const containsCodeKeywords = cleanAnswer.includes("function") || cleanAnswer.includes("def ") || cleanAnswer.includes("return") || cleanAnswer.includes("let ") || cleanAnswer.includes("const ") || cleanAnswer.includes("for") || cleanAnswer.includes("while");
       const hasSyntaxError = cleanAnswer.includes("syntaxerror") || cleanAnswer.includes("error");
 
       if (!containsCodeKeywords || hasSyntaxError) {
         return {
-          technicalAccuracy: 2,
+          technicalAccuracy: 3,
           depthOfKnowledge: 2,
-          problemSolving: 1,
-          communicationClarity: 3,
-          confidence: 2,
-          feedback: "The code submitted did not contain valid syntactic structures or failed standard compile execution blocks.",
-          idealAnswerSummary: "The optimal solution would implement a sliding window O(N) solution using a hash map or character set."
+          problemSolving: 2,
+          communicationClarity: 4,
+          confidence: 3,
+          feedback: "The submitted solution contained syntax mistakes or lacked completed control logic.",
+          idealAnswerSummary: "An optimal implementation uses an O(N) sliding window with a hash map to track character indices."
         };
       }
+      return {
+        technicalAccuracy: 8,
+        depthOfKnowledge: 7,
+        problemSolving: 8,
+        communicationClarity: 7,
+        confidence: 8,
+        feedback: "Solid code submission. Control flow and data structure usage are correct with efficient time complexity.",
+        idealAnswerSummary: "A complete solution handles boundary cases (empty input, single char) cleanly with O(N) time and O(min(N, M)) space."
+      };
     }
 
-    // Heuristics for valid/realistic grading
-    let score = 5;
-    let feedback = "Provided a generic explanation. Lacked structural STAR layouts, complexity breakdowns, and specific edge case descriptions.";
-    
-    if (phase === "RESUME_Q") {
-      if (cleanAnswer.includes("react") || cleanAnswer.includes("hook") || cleanAnswer.includes("state") || cleanAnswer.includes("typescript") || cleanAnswer.includes("node")) {
-        score = 8;
-        feedback = "Addressed resume projects and skills well, showing familiarity with the runtime environment and libraries.";
-      }
-    } else if (phase === "SYSTEM_DESIGN") {
-      if (cleanAnswer.includes("scale") || cleanAnswer.includes("redis") || cleanAnswer.includes("websocket") || cleanAnswer.includes("database") || cleanAnswer.includes("cache")) {
-        score = 8;
-        feedback = "Correctly addressed scalability bottlenecks, explaining connection management and caching layer tradeoffs.";
-      }
-    } else if (phase === "BEHAVIORAL") {
-      if (cleanAnswer.includes("conflict") || cleanAnswer.includes("agree") || cleanAnswer.includes("team") || cleanAnswer.includes("resolution")) {
-        score = 8;
-        feedback = "Response structured well using standard STAR frameworks, highlighting team coordination and collaborative alignment.";
-      }
-    } else if (phase === "CODING") {
-      if (cleanAnswer.includes("return") && (cleanAnswer.includes("for") || cleanAnswer.includes("while") || cleanAnswer.includes("map") || cleanAnswer.includes("reduce") || cleanAnswer.includes("filter") || cleanAnswer.includes("if"))) {
-        score = 9;
-        feedback = "The submitted code successfully compiles, implements logic loops correctly, and passes standard complexity checks.";
-      }
-    }
+    // Dynamic scoring based on keyword depth and response length
+    const techKeywords = ["react", "node", "typescript", "postgres", "redis", "websocket", "scale", "state", "hook", "async", "await", "cache", "index", "star", "architecture", "tradeoff", "api", "database"];
+    const matchedCount = techKeywords.filter(kw => cleanAnswer.includes(kw)).length;
+
+    let accuracy = Math.min(9, 4 + matchedCount);
+    let depth = Math.min(9, 3 + Math.floor(cleanAnswer.length / 50));
+    let problemSolving = Math.min(9, 4 + Math.floor(matchedCount * 0.8));
+    let clarity = Math.min(9, 5 + (cleanAnswer.length > 100 ? 2 : 0));
+    let confidence = Math.min(9, 4 + Math.min(3, matchedCount));
 
     return {
-      technicalAccuracy: score,
-      depthOfKnowledge: score,
-      problemSolving: Math.max(1, score - 1),
-      communicationClarity: Math.max(1, score + 1),
-      confidence: score,
-      feedback,
-      idealAnswerSummary: "An ideal response would detail performance metrics, discuss trade-offs, and suggest optimizations."
+      technicalAccuracy: accuracy,
+      depthOfKnowledge: depth,
+      problemSolving: problemSolving,
+      communicationClarity: clarity,
+      confidence: confidence,
+      feedback: matchedCount >= 3 
+        ? "Strong and detailed technical explanation addressing core design choices and relevant frameworks."
+        : "Reasonable answer, but could be improved by providing deeper architectural details and concrete examples.",
+      idealAnswerSummary: "An ideal response addresses core trade-offs, scalability considerations, error handling strategies, and practical real-world scenarios."
     };
   }
 

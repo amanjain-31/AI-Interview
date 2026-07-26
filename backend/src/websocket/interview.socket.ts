@@ -310,37 +310,60 @@ async function handleMessage(state: ConnectionState, msg: any) {
 }
 
 function simulateCodeExecution(code: string, language: string) {
-  // Simple check for syntax compilation representation
   const outputLogs: string[] = [];
   let executionTimeMs = 12;
   let memoryUsageKb = 1024;
   let success = true;
 
+  if (!code || code.trim() === "" || code.includes("Write your code here")) {
+    return {
+      success: false,
+      logs: "Execution Error: No code provided or code is empty. Please implement the solution.",
+      executionTimeMs: 0,
+      memoryUsageKb: 0,
+    };
+  }
+
+  // Basic check for loops or variables which indicates an attempt was made
+  const hasLogic = code.includes("for") || code.includes("while") || code.includes("return") || code.includes("if") || code.includes("Math.");
+  if (!hasLogic) {
+    return {
+      success: false,
+      logs: "Test Case 1 failed: Output did not match expected result.\nReason: Implementation seems to be missing core logic.",
+      executionTimeMs: 2,
+      memoryUsageKb: 512,
+    };
+  }
+
   if (language === "javascript" || language === "typescript") {
-    if (code.includes("syntax error") || code.includes("const ") && !code.includes("=")) {
+    if (code.includes("syntax error") || (code.includes("const ") && !code.includes("="))) {
       success = false;
-      outputLogs.push("SyntaxError: Unexpected token");
+      outputLogs.push("SyntaxError: Unexpected token or uninitialized constant");
     } else {
-      outputLogs.push("Running code tests...");
-      outputLogs.push("Test Case 1 passed: sum(2, 3) === 5");
-      outputLogs.push("Test Case 2 passed: sum(-1, 5) === 4");
-      executionTimeMs = Math.floor(Math.random() * 20) + 2;
+      outputLogs.push("Executing unit test cases...");
+      outputLogs.push("✓ Test Case 1 passed: findMedianSortedArrays([1,3], [2]) === 2.0");
+      outputLogs.push("✓ Test Case 2 passed: findMedianSortedArrays([1,2], [3,4]) === 2.5");
+      outputLogs.push("✓ Test Case 3 passed: findMedianSortedArrays([0,0], [0,0]) === 0.0");
+      executionTimeMs = Math.floor(Math.random() * 15) + 3;
       memoryUsageKb = 1540 + Math.floor(Math.random() * 200);
     }
   } else if (language === "python") {
     if (code.includes("def") && !code.includes(":")) {
       success = false;
-      outputLogs.push("  File \"main.py\", line 2\n    def test\n            ^\nSyntaxError: invalid syntax");
+      outputLogs.push("  File \"solution.py\", line 2\n    def findMedianSortedArrays(nums1, nums2)\n                                  ^\nSyntaxError: invalid syntax");
     } else {
-      outputLogs.push("Test Case 1 passed: sum(2, 3) == 5");
-      executionTimeMs = Math.floor(Math.random() * 15) + 1;
+      outputLogs.push("Executing unit test cases...");
+      outputLogs.push("✓ Test Case 1 passed: findMedianSortedArrays([1,3], [2]) == 2.0");
+      outputLogs.push("✓ Test Case 2 passed: findMedianSortedArrays([1,2], [3,4]) == 2.5");
+      outputLogs.push("✓ Test Case 3 passed: findMedianSortedArrays([0,0], [0,0]) == 0.0");
+      executionTimeMs = Math.floor(Math.random() * 12) + 2;
       memoryUsageKb = 2024 + Math.floor(Math.random() * 100);
     }
   } else {
     // Java, C++
-    outputLogs.push("Compiling Class Main...");
-    outputLogs.push("Execution completed. Standard test cases passed.");
-    executionTimeMs = Math.floor(Math.random() * 30) + 10;
+    outputLogs.push("Compiling Solution Class...");
+    outputLogs.push("✓ All test cases passed successfully.");
+    executionTimeMs = Math.floor(Math.random() * 25) + 5;
     memoryUsageKb = 8124;
   }
 
@@ -370,29 +393,39 @@ async function askNextQuestion(state: ConnectionState, phase: string) {
   let questionText = "";
 
   if (phase === "RESUME_Q") {
-    const qList = await AIService.generateQuestions(
-      session.candidate.resumeData,
-      state.jobDescription,
-      state.difficulty,
-      "RESUME_Q"
-    );
     const questionsCount = await prisma.question.count({
       where: { sessionId, phase: "RESUME_Q" },
     });
 
     if (questionsCount === 0) {
-      questionText = `Hello ${state.candidateName}! Welcome to your technical interview for the ${state.jobTitle} position. To start off, could you please introduce yourself and tell me a bit about your background?`;
+      questionText = `Hello ${state.candidateName}! Welcome to your technical interview for the ${state.jobTitle} position. To start off, could you please introduce yourself, tell me about your background, and summarize your core experience and projects?`;
     } else {
-      questionText = qList[0] || `Thank you! Looking at your resume and experience, could you detail one of your most challenging projects and describe the technical skills and tradeoffs you encountered?`;
+      const resume = session.candidate.resumeData;
+      if (resume && (resume.skills || resume.projects || resume.experience)) {
+        const parsedSkills = resume.skills || "your listed technical stack";
+        const parsedProjects = resume.projects || "your technical projects";
+        questionText = `Thank you! Looking at your parsed resume, you mentioned experience with ${parsedSkills} and projects involving ${parsedProjects}. Could you detail the architecture of one of these key projects and explain the technical challenges and trade-offs you faced?`;
+      } else {
+        const qList = await AIService.generateQuestions(
+          resume,
+          state.jobDescription,
+          state.difficulty,
+          "RESUME_Q"
+        );
+        questionText = qList[0] || `Thank you! Could you detail one of your most challenging software projects and describe the technical architecture and tradeoffs you encountered?`;
+      }
     }
   } else if (phase === "CODING") {
-    questionText = `Implement a function to find the length of the longest substring without repeating characters in the input string.
-  
-  Example:
-  Input: "abcabcbb"
-  Output: 3 (The answer is "abc")
-  
-  Please write and run your code in the editor, and submit when ready.`;
+    questionText = `Implement a function to find the Median of Two Sorted Arrays.
+
+Problem Requirements:
+Given two sorted arrays nums1 and nums2 of size m and n respectively, return the median of the two sorted arrays. The overall run time complexity should be O(log (m+n)).
+
+Examples:
+- Input: nums1 = [1,3], nums2 = [2] -> Expected Output: 2.0
+- Input: nums1 = [1,2], nums2 = [3,4] -> Expected Output: 2.5
+
+Please write your solution in the code editor, test your code, and submit when ready.`;
   } else if (phase === "SYSTEM_DESIGN") {
     questionText = `Design a real-time notification service (like push notifications for Slack or WhatsApp).
   How would you handle scale, transient message caching, and persistent WebSocket connections for millions of users?`;

@@ -73,6 +73,7 @@ export default function CandidateInterviewPage() {
   // Practice session scorecard details
   const [practiceReport, setPracticeReport] = useState<any>(null);
   const [practiceReportLoading, setPracticeReportLoading] = useState(false);
+  const [showEndModal, setShowEndModal] = useState(false);
 
   const logWs = (msg: string) => {
     console.log(`WS LOG: ${msg}`);
@@ -388,64 +389,29 @@ export default function CandidateInterviewPage() {
     }
   };
 
-  // Silence Timer logic - 5 seconds of inactivity auto-skips question
+  // Silence Timer logic - safe duration (60 seconds) so candidate isn't cut off
   const startSilenceTimer = () => {
     if (silenceTimerRef.current) clearTimeout(silenceTimerRef.current);
-
+    // Safe duration of 60s instead of 5s to avoid cutting off candidate
     silenceTimerRef.current = setTimeout(() => {
-      logWs("Silence timeout elapsed! Transitioning automatically to next question.");
-      
-      if (typeof window !== "undefined" && window.speechSynthesis) {
-        window.speechSynthesis.cancel();
-        const utterance = new SpeechSynthesisUtterance("We are further moving to next question.");
-        utterance.rate = 1.0;
-        
-        utterance.onend = () => {
-          handleSubmitTimeoutAnswer();
-        };
-        window.speechSynthesis.speak(utterance);
-      } else {
-        handleSubmitTimeoutAnswer();
-      }
-    }, 5000); // 5 seconds
+      logWs("No interaction detected after 60 seconds.");
+    }, 60000);
   };
 
   const resetSilenceTimer = () => {
     if (silenceTimerRef.current) {
-      logWs("Silence timer reset (candidate interaction).");
       clearTimeout(silenceTimerRef.current);
       silenceTimerRef.current = null;
     }
   };
 
   const triggerSpeechSilenceCountdown = (currentAnswerText: string) => {
-    if (speechSilenceTimerRef.current) clearTimeout(speechSilenceTimerRef.current);
-    if (!currentAnswerText.trim()) return;
-
-    logWs("Candidate speaking detected. Starting 3-second auto-submit silence timer...");
-    speechSilenceTimerRef.current = setTimeout(() => {
-      logWs("3 seconds of silence after speech detected! Auto-submitting candidate answer...");
-      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
-        setLiveCaption(currentAnswerText);
-        socketRef.current.send(
-          JSON.stringify({
-            type: "submit_answer",
-            text: currentAnswerText,
-            durationMs: 4000,
-          })
-        );
-        setTypedAnswer("");
-        if (speechSilenceTimerRef.current) {
-          clearTimeout(speechSilenceTimerRef.current);
-          speechSilenceTimerRef.current = null;
-        }
-      }
-    }, 3000); // 3 seconds
+    // Keep live caption updated without auto-submitting while candidate thinks
+    setLiveCaption(currentAnswerText);
   };
 
   const resetSpeechSilenceCountdown = () => {
     if (speechSilenceTimerRef.current) {
-      logWs("Speech silence countdown reset.");
       clearTimeout(speechSilenceTimerRef.current);
       speechSilenceTimerRef.current = null;
     }
@@ -548,6 +514,39 @@ export default function CandidateInterviewPage() {
       if (rec) rec.stop();
     };
   }, [phase]);
+
+  const toggleManualMic = () => {
+    if (recognitionRef.current) {
+      try { recognitionRef.current.stop(); } catch (e) {}
+    }
+    
+    if (!micActive) {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (SpeechRecognition) {
+        try {
+          const rec = new SpeechRecognition();
+          rec.continuous = true;
+          rec.interimResults = false;
+          rec.lang = "en-US";
+          rec.onstart = () => setMicActive(true);
+          rec.onresult = (event: any) => {
+            const lastIndex = event.results.length - 1;
+            const transcript = event.results[lastIndex][0].transcript;
+            setTypedAnswer((prev) => (prev ? `${prev} ${transcript}` : transcript));
+          };
+          rec.onend = () => {
+             setMicActive(false);
+          };
+          recognitionRef.current = rec;
+          rec.start();
+        } catch (e) {
+          console.warn("Could not start manual mic:", e);
+        }
+      }
+    } else {
+       setMicActive(false);
+    }
+  };
 
   // Submit response verbally/typed
   const handleSubmitAnswer = () => {
@@ -937,11 +936,46 @@ export default function CandidateInterviewPage() {
           
           {/* Permanent submit early button inside the active workspace screen */}
           <button
-            onClick={handleEarlyEndInterview}
-            className="fixed bottom-6 right-6 px-4 py-2.5 bg-white/5 backdrop-blur-md hover:bg-red-50 border border-red-200 text-red-600 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 z-50 transition-all hover:scale-105"
+            onClick={() => setShowEndModal(true)}
+            className="fixed top-24 right-6 px-4 py-2.5 bg-white/5 backdrop-blur-md hover:bg-red-900/30 border border-red-500/30 text-red-500 rounded-xl text-xs font-bold shadow-xl flex items-center gap-1.5 z-50 transition-all hover:scale-105"
           >
             <ShieldAlert className="w-4 h-4 text-red-500" /> End Assessment Early
           </button>
+
+          {/* Custom End Modal */}
+          {showEndModal && (
+            <div className="fixed inset-0 bg-black/80 z-[100] flex items-center justify-center p-4">
+              <div className="bg-[#12141f] border border-red-500/30 p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center">
+                <ShieldAlert className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                <h3 className="text-xl font-bold mb-2">End Assessment?</h3>
+                <p className="text-xs text-zinc-400 mb-6">
+                  Are you sure you want to end and submit the interview early? Your answers submitted so far will be evaluated immediately.
+                </p>
+                <div className="flex gap-4 justify-center">
+                  <button 
+                    onClick={() => setShowEndModal(false)}
+                    className="px-6 py-2.5 rounded-xl border border-white/10 hover:bg-white/10 text-xs font-bold transition-all"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowEndModal(false);
+                      resetSilenceTimer();
+                      resetSpeechSilenceCountdown();
+                      if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+                        logWs("Dispatching early end interview request...");
+                        socketRef.current.send(JSON.stringify({ type: "end_interview" }));
+                      }
+                    }}
+                    className="px-6 py-2.5 bg-red-600 hover:bg-red-500 rounded-xl text-xs font-bold text-white transition-all shadow-lg shadow-red-500/20"
+                  >
+                    Yes, Submit Now
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Hidden video element for proctoring */}
           <video ref={videoRef} autoPlay playsInline muted className="hidden" />
@@ -966,37 +1000,57 @@ export default function CandidateInterviewPage() {
             ) : (
               <div className="flex flex-col items-center justify-center gap-12 w-full max-w-2xl mx-auto h-full min-h-[60vh]">
                 
-                {/* Large Mic Symbol (Gradient) */}
-                <div className="relative w-40 h-40 flex items-center justify-center">
+                {/* Interactive Mic Button */}
+                <div 
+                  onClick={toggleManualMic}
+                  className="relative w-40 h-40 flex items-center justify-center cursor-pointer group"
+                  title="Click to toggle microphone recording"
+                >
                   {micActive && (
                     <>
                       <div className="absolute inset-0 rounded-full border border-indigo-500/30 animate-ring-pulse-slow" />
                       <div className="absolute inset-3 rounded-full border border-violet-500/20 animate-ring-pulse-fast" />
                     </>
                   )}
-                  <div className={`w-28 h-28 rounded-full flex items-center justify-center z-10 shadow-2xl transition-all duration-300 ${micActive ? 'bg-gradient-to-tr from-[#FF3300] to-[#FFB200] shadow-[#FF3300]/20 scale-110' : 'bg-zinc-800/80 scale-100'}`}>
+                  <div className={`w-28 h-28 rounded-full flex items-center justify-center z-10 shadow-2xl transition-all duration-300 group-hover:scale-105 ${micActive ? 'bg-gradient-to-tr from-[#FF3300] to-[#FFB200] shadow-[#FF3300]/20 scale-110' : 'bg-zinc-800/80 scale-100'}`}>
                     {micActive ? <Mic className="w-12 h-12 text-zinc-100 animate-pulse" /> : <MicOff className="w-12 h-12 text-zinc-400" />}
                   </div>
                 </div>
 
-                {/* Live Captions */}
-                <div className="w-full">
-                  <p className="text-xl md:text-2xl text-zinc-100 font-medium italic leading-relaxed tracking-wide min-h-[4rem] transition-all duration-300">
+                <div className="text-xs font-semibold text-zinc-400">
+                  {micActive ? "🎙️ Recording speech... (Click mic icon to pause)" : "Click mic icon or type below to answer"}
+                </div>
+
+                {/* Live Captions / Transcribed Speech Preview */}
+                <div className="w-full space-y-3">
+                  <p className="text-lg md:text-xl text-zinc-100 font-medium italic leading-relaxed tracking-wide min-h-[3rem] transition-all duration-300">
                     "{liveCaption}"
                   </p>
+                  
+                  {/* Candidate Editable Answer Box */}
+                  <textarea
+                    value={typedAnswer}
+                    onChange={(e) => {
+                      setTypedAnswer(e.target.value);
+                      setLiveCaption(e.target.value || "Awaiting your answer...");
+                    }}
+                    placeholder="Your recorded speech appears here. You can also type or edit your response directly..."
+                    rows={3}
+                    className="w-full p-4 text-sm bg-white/5 border border-white/10 rounded-2xl text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-indigo-500 transition-all resize-none"
+                  />
                 </div>
 
                 {/* Submit Response Option */}
-                <div className="flex flex-col items-center gap-3 mt-4">
+                <div className="flex flex-col items-center gap-3 mt-2">
                   <button
                     onClick={handleSubmitAnswer}
                     disabled={isEvaluating || !typedAnswer.trim()}
-                    className="px-8 py-3.5 bg-white/5 backdrop-blur-md hover:bg-zinc-200 text-black rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100"
+                    className="px-8 py-3.5 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white rounded-full font-bold text-sm shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 cursor-pointer"
                   >
                     Submit Response
                   </button>
                   {isEvaluating && (
-                    <div className="text-xs text-[#FF3300] font-bold flex items-center gap-2">
+                    <div className="text-xs text-indigo-400 font-bold flex items-center gap-2">
                       <Loader2 className="w-4 h-4 animate-spin" /> Evaluating answer...
                     </div>
                   )}

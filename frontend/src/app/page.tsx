@@ -2,17 +2,17 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { 
-  Bot, 
-  Terminal, 
-  BrainCircuit, 
-  Sparkles, 
-  ArrowRight, 
-  CheckCircle, 
-  ShieldAlert, 
-  Volume2, 
-  ChevronDown, 
-  ChevronUp, 
+import {
+  Bot,
+  Terminal,
+  BrainCircuit,
+  Sparkles,
+  ArrowRight,
+  CheckCircle,
+  ShieldAlert,
+  Volume2,
+  ChevronDown,
+  ChevronUp,
   MessageSquare,
   Lock,
   Star,
@@ -24,13 +24,59 @@ import {
   Cpu,
   ShieldCheck,
   Award,
-  Loader2
+  Loader2,
+  Mail,
+  Phone,
+  Send
 } from "lucide-react";
 
 export default function LandingPage() {
   const [billingCycle, setBillingCycle] = useState<"monthly" | "yearly">("yearly");
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
-  
+
+  // Contact form state
+  const [contactName, setContactName] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [contactMessage, setContactMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitResult, setSubmitResult] = useState<{ success: boolean; message: string } | null>(null);
+
+  const handleContactSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setSubmitResult(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("access_key", process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY || "6d0b1452-74db-4e27-8c09-d527f507abdf");
+      formData.append("name", contactName);
+      formData.append("email", contactEmail);
+      formData.append("message", contactMessage);
+      formData.append("subject", `New Message from ${contactName} - HireAI Website`);
+      formData.append("from_name", "HireAI Contact Form");
+
+      const response = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setSubmitResult({ success: true, message: "Message sent successfully! Aman will get back to you soon." });
+        setContactName("");
+        setContactEmail("");
+        setContactMessage("");
+      } else {
+        setSubmitResult({ success: false, message: data.message || "Failed to send. Please verify your Web3Forms Access Key." });
+      }
+    } catch (err) {
+      setSubmitResult({ success: false, message: "Network error. Unable to connect to Web3Forms." });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   // Interactive demo states
   const [demoState, setDemoState] = useState<"IDLE" | "TALKING" | "LISTENING" | "EVALUATING" | "RESULT">("IDLE");
   const [demoText, setDemoText] = useState("Click 'Start Communication Check' to begin. The AI will give you a phrase to say — just speak it clearly and confidently!");
@@ -136,13 +182,13 @@ export default function LandingPage() {
         setDemoTranscript(capturedTranscript);
       };
 
-      rec.onerror = () => {};
+      rec.onerror = () => { };
 
-      try { rec.start(); } catch (e) {}
+      try { rec.start(); } catch (e) { }
 
       // Record for 8 seconds then auto-evaluate
       setTimeout(() => {
-        try { rec.stop(); } catch (e) {}
+        try { rec.stop(); } catch (e) { }
         setTimeout(() => {
           evaluateTranscript(capturedTranscript, peakVolume);
         }, 600);
@@ -238,9 +284,8 @@ export default function LandingPage() {
       setDemoScore(overallScore);
       setDemoFeedback(overallFeedback);
       setDemoState("RESULT");
-      setDemoText(`Communication Score: ${overallScore}/10\n${recommendation}\n\n${overallFeedback}${
-        transcript ? `\n\nYour transcript:\n"${transcript}"` : "\n\n(No transcript captured — microphone may not be enabled)"
-      }`);
+      setDemoText(`Communication Score: ${overallScore}/10\n${recommendation}\n\n${overallFeedback}${transcript ? `\n\nYour transcript:\n"${transcript}"` : "\n\n(No transcript captured — microphone may not be enabled)"
+        }`);
 
       if (typeof window !== "undefined" && window.speechSynthesis) {
         window.speechSynthesis.cancel();
@@ -273,7 +318,7 @@ export default function LandingPage() {
 
   return (
     <div className="bg-transparent text-zinc-100 min-h-screen font-sans overflow-x-hidden relative">
-      
+
       {/* Radiant glow elements */}
       <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[800px] h-[600px] bg-gradient-to-b from-[#FF3300]/5 via-[#FFB200]/5 to-transparent rounded-full blur-[140px] pointer-events-none" />
       <div className="absolute top-[1200px] right-[-10%] w-[500px] h-[500px] bg-purple-500/5 rounded-full blur-[120px] pointer-events-none" />
@@ -299,18 +344,19 @@ export default function LandingPage() {
             <a href="#features" className="premium-glow-link">Features</a>
             <a href="#demo" className="premium-glow-link">Interactive Demo</a>
             <a href="#pricing" className="premium-glow-link">Pricing</a>
+            <a href="#contact" className="premium-glow-link">Contact</a>
             <a href="#faq" className="premium-glow-link">FAQ</a>
           </nav>
 
           <div className="flex items-center gap-5">
-            <Link 
-              href="/student" 
+            <Link
+              href="/student"
               className="text-xs font-bold hover:text-[#FF3300] transition-colors flex items-center gap-1.5 text-zinc-400"
             >
               <GraduationCap className="w-4 h-4 text-[#FF3300]" /> Student Arena
             </Link>
-            <Link 
-              href="/recruiter" 
+            <Link
+              href="/recruiter"
               className="px-5 py-2.5 rounded-full btn-vibrant flex items-center gap-1.5 text-xs font-bold"
             >
               Recruiter Hub <ArrowRight className="w-4 h-4" />
@@ -339,7 +385,7 @@ export default function LandingPage() {
 
         {/* Action portals cards */}
         <div className="grid md:grid-cols-2 gap-6 w-full max-w-4xl mt-4">
-          
+
           {/* Recruiters Portal Card */}
           <div className="premium-card p-8 text-left flex flex-col justify-between gap-6 group hover:-translate-y-1 transition-all duration-300">
             <div className="space-y-4">
@@ -353,8 +399,8 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <Link 
-              href="/recruiter" 
+            <Link
+              href="/recruiter"
               className="w-full py-3.5 bg-gradient-to-r from-[#FF3300] to-[#FFB200] hover:scale-[1.02] text-white font-bold rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg shadow-orange-500/20 transition-all"
             >
               Enter Recruiter Portal <ArrowRight className="w-4 h-4" />
@@ -374,8 +420,8 @@ export default function LandingPage() {
                 </p>
               </div>
             </div>
-            <Link 
-              href="/student" 
+            <Link
+              href="/student"
               className="w-full py-3.5 bg-zinc-900 hover:bg-zinc-800 text-white font-bold rounded-xl text-xs text-center flex items-center justify-center gap-1.5 shadow-lg transition-all hover:scale-[1.02]"
             >
               Practice Free Mocks (3 Free) <ArrowRight className="w-4 h-4" />
@@ -417,12 +463,11 @@ export default function LandingPage() {
                 <span className="text-zinc-200">HireAI Communication Check — Interactive Demo</span>
               </div>
               <div className="flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full">
-                <span className={`w-2 h-2 rounded-full ${
-                  demoState === "LISTENING" ? "bg-red-500 animate-ping" :
-                  demoState === "RESULT" ? "bg-emerald-400" :
-                  demoState !== "IDLE" ? "bg-orange-400 animate-pulse" :
-                  "bg-gray-500"
-                }`} />
+                <span className={`w-2 h-2 rounded-full ${demoState === "LISTENING" ? "bg-red-500 animate-ping" :
+                    demoState === "RESULT" ? "bg-emerald-400" :
+                      demoState !== "IDLE" ? "bg-orange-400 animate-pulse" :
+                        "bg-gray-500"
+                  }`} />
                 <span className="text-[9px] text-gray-400 uppercase tracking-widest">{demoState}</span>
               </div>
             </div>
@@ -439,23 +484,20 @@ export default function LandingPage() {
             {/* Avatar + live status area */}
             <div className="flex flex-col items-center gap-6 text-center z-10 py-4">
               <div className="relative w-28 h-28 flex items-center justify-center">
-                <div className={`absolute inset-0 rounded-full border border-[#FF3300]/30 ${
-                  demoState === "TALKING" ? "animate-ring-pulse-slow" :
-                  demoState === "LISTENING" ? "animate-ring-pulse-fast" : "opacity-0"
-                }`} />
-                <div className={`absolute inset-4 rounded-full border border-[#FFB200]/20 ${
-                  demoState === "LISTENING" ? "animate-ring-pulse-slow" : "opacity-0"
-                }`} />
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center z-10 shadow-2xl transition-all duration-300 ${
-                  demoState === "LISTENING" ? "bg-gradient-to-tr from-red-600 to-[#FF3300] shadow-red-500/30 scale-110" :
-                  demoState === "RESULT" && demoScore !== null && demoScore >= 7 ? "bg-gradient-to-tr from-emerald-600 to-emerald-400 shadow-emerald-500/30" :
-                  demoState === "RESULT" ? "bg-gradient-to-tr from-amber-600 to-amber-400 shadow-amber-500/30" :
-                  "bg-gradient-to-tr from-[#FF3300] to-[#FFB200] shadow-orange-500/30"
-                }`}>
+                <div className={`absolute inset-0 rounded-full border border-[#FF3300]/30 ${demoState === "TALKING" ? "animate-ring-pulse-slow" :
+                    demoState === "LISTENING" ? "animate-ring-pulse-fast" : "opacity-0"
+                  }`} />
+                <div className={`absolute inset-4 rounded-full border border-[#FFB200]/20 ${demoState === "LISTENING" ? "animate-ring-pulse-slow" : "opacity-0"
+                  }`} />
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center z-10 shadow-2xl transition-all duration-300 ${demoState === "LISTENING" ? "bg-gradient-to-tr from-red-600 to-[#FF3300] shadow-red-500/30 scale-110" :
+                    demoState === "RESULT" && demoScore !== null && demoScore >= 7 ? "bg-gradient-to-tr from-emerald-600 to-emerald-400 shadow-emerald-500/30" :
+                      demoState === "RESULT" ? "bg-gradient-to-tr from-amber-600 to-amber-400 shadow-amber-500/30" :
+                        "bg-gradient-to-tr from-[#FF3300] to-[#FFB200] shadow-orange-500/30"
+                  }`}>
                   {demoState === "LISTENING" ? <Mic className="w-9 h-9 text-white animate-pulse" /> :
-                   demoState === "EVALUATING" ? <Loader2 className="w-8 h-8 text-white animate-spin" /> :
-                   demoState === "RESULT" ? <Award className="w-9 h-9 text-white" /> :
-                   <Bot className="w-9 h-9 text-white" />}
+                    demoState === "EVALUATING" ? <Loader2 className="w-8 h-8 text-white animate-spin" /> :
+                      demoState === "RESULT" ? <Award className="w-9 h-9 text-white" /> :
+                        <Bot className="w-9 h-9 text-white" />}
                 </div>
               </div>
 
@@ -470,7 +512,7 @@ export default function LandingPage() {
                         width: `${demoVolume}%`,
                         background: demoVolume > 60 ? "linear-gradient(90deg,#16a34a,#4ade80)" :
                           demoVolume > 30 ? "linear-gradient(90deg,#FF3300,#FFB200)" :
-                          "linear-gradient(90deg,#ef4444,#f97316)"
+                            "linear-gradient(90deg,#ef4444,#f97316)"
                       }}
                     />
                   </div>
@@ -493,10 +535,9 @@ export default function LandingPage() {
                 <div className="w-full max-w-md space-y-4">
                   <div className="flex items-center justify-center gap-5">
                     <div className="text-center">
-                      <div className={`text-5xl font-black ${
-                        demoScore >= 7 ? "text-emerald-400" :
-                        demoScore >= 5 ? "text-[#FFB200]" : "text-red-400"
-                      }`}>{demoScore}</div>
+                      <div className={`text-5xl font-black ${demoScore >= 7 ? "text-emerald-400" :
+                          demoScore >= 5 ? "text-[#FFB200]" : "text-red-400"
+                        }`}>{demoScore}</div>
                       <div className="text-[10px] text-zinc-400 mt-1 font-bold">/ 10</div>
                     </div>
                     <div className="text-left max-w-xs">
@@ -511,7 +552,7 @@ export default function LandingPage() {
                         width: `${(demoScore / 10) * 100}%`,
                         background: demoScore >= 7 ? "linear-gradient(90deg,#16a34a,#4ade80)" :
                           demoScore >= 5 ? "linear-gradient(90deg,#FF3300,#FFB200)" :
-                          "linear-gradient(90deg,#ef4444,#f97316)"
+                            "linear-gradient(90deg,#ef4444,#f97316)"
                       }}
                     />
                   </div>
@@ -549,8 +590,8 @@ export default function LandingPage() {
                 <div className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold text-zinc-400">
                   <Loader2 className="w-4 h-4 animate-spin text-[#FF3300]" />
                   {demoState === "TALKING" ? "AI is giving your speaking prompt..." :
-                   demoState === "LISTENING" ? "🔴 Recording — speak your phrase now! (8 sec)" :
-                   "Analyzing communication quality..."}
+                    demoState === "LISTENING" ? "🔴 Recording — speak your phrase now! (8 sec)" :
+                      "Analyzing communication quality..."}
                 </div>
               )}
             </div>
@@ -567,7 +608,7 @@ export default function LandingPage() {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
-            
+
             {/* feature 1 */}
             <div className="premium-card p-8 flex flex-col gap-5 hover:-translate-y-2 transition-transform duration-300">
               <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-[#FF3300] to-[#FFB200] flex items-center justify-center text-white shadow-lg shadow-orange-500/20">
@@ -614,7 +655,7 @@ export default function LandingPage() {
           {/* Toggle monthly/yearly */}
           <div className="flex items-center justify-center gap-3 mb-12 text-sm font-bold text-zinc-400">
             <span>Monthly Billing</span>
-            <button 
+            <button
               onClick={() => setBillingCycle(billingCycle === "monthly" ? "yearly" : "monthly")}
               className="w-12 h-6 rounded-full bg-white/10 relative p-1 transition-colors hover:bg-white/20"
             >
@@ -622,10 +663,10 @@ export default function LandingPage() {
             </button>
             <span className="text-zinc-100">Yearly <span className="text-[#FF3300]">(Save 20%)</span></span>
           </div>
- 
+
           {/* Cards Grid */}
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto text-left items-stretch">
-            
+
             {/* tier 1 */}
             <div className="premium-card p-8 flex flex-col justify-between gap-8">
               <div className="space-y-4">
@@ -642,15 +683,15 @@ export default function LandingPage() {
               </div>
               <Link href="/student" className="block text-center py-3.5 bg-white/5 backdrop-blur-md border-2 border-white/10 hover:border-[#FF3300] text-zinc-100 hover:text-[#FF3300] font-bold text-sm rounded-full transition-all">Register Sandbox</Link>
             </div>
- 
+
             {/* tier 2 */}
             <div className="premium-card p-8 border-2 border-[#FF3300] flex flex-col justify-between gap-8 relative transform md:-translate-y-4 shadow-[0_20px_50px_rgba(255,51,0,0.1)] !overflow-visible">
               <div className="absolute top-0 right-6 -translate-y-1/2 bg-gradient-to-r from-[#FF3300] to-[#FFB200] text-white text-[9px] uppercase font-black px-3 py-1 rounded-full tracking-widest shadow-lg z-20">Startup Focus</div>
               <div className="space-y-4">
                 <span className="text-[10px] uppercase font-black text-[#FF3300] tracking-widest block">Hiring Agency</span>
                 <div>
-                  <h4 className="text-4xl font-black text-zinc-100">${billingCycle === "yearly" ? "199" : "249"}</h4>
-                  <span className="text-xs text-zinc-400 font-medium"> / billing month</span>
+                  <h4 className="text-4xl font-black text-zinc-100">$0 <span className="text-sm font-normal text-zinc-400">/ 1st mo</span></h4>
+                  <span className="text-xs text-zinc-400 font-medium">then $199 / month afterwards</span>
                 </div>
                 <ul className="space-y-4 text-sm text-zinc-400 pt-6 border-t border-white/10 font-medium">
                   <li className="flex gap-2.5 items-center"><CheckCircle className="w-5 h-5 text-[#FF3300]" /> 50 Candidate screens/mo</li>
@@ -675,9 +716,134 @@ export default function LandingPage() {
                   <li className="flex gap-2.5 items-center"><CheckCircle className="w-5 h-5 text-indigo-500" /> ATS integrations & Webhooks</li>
                 </ul>
               </div>
-              <button className="w-full py-3.5 bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm rounded-full transition-colors">Contact Sales</button>
+              <a href="https://mail.google.com/mail/?view=cm&fs=1&to=amanjain310105@gmail.com&su=Enterprise%20Inquiry%20-%20HireAI" target="_blank" rel="noopener noreferrer" className="block text-center w-full py-3.5 bg-zinc-900 hover:bg-zinc-800 text-white font-bold text-sm rounded-full transition-colors">Contact Sales</a>
             </div>
 
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="py-24 px-6 max-w-6xl mx-auto">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl sm:text-5xl font-black mb-4 text-zinc-100 font-[Outfit] inline-block relative">
+            Get In Touch
+            <div className="h-1.5 w-24 bg-gradient-to-r from-violet-500 to-cyan-400 rounded-full mx-auto mt-2" />
+          </h2>
+          <p className="text-zinc-400 text-sm max-w-xl mx-auto font-medium mt-4">
+            Feel free to reach out if you're looking for a developer, have a question, or just want to connect.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-5 gap-8 items-stretch">
+          {/* Left Column: Contact Information */}
+          {/* Left Column: Contact Information */}
+          <div className="md:col-span-2 premium-card p-8 rounded-3xl flex flex-col justify-between min-h-[420px] bg-[#0c0e1a]/80 border border-white/10">
+            <div>
+              <h3 className="text-xl font-bold text-zinc-100 mb-8 font-[Outfit]">Contact Information</h3>
+              <div className="space-y-6">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-violet-500/10 border border-violet-500/20 flex items-center justify-center text-violet-400">
+                    <Mail className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">Email</span>
+                    <a href="mailto:amanjain310105@gmail.com" className="text-sm font-semibold text-zinc-200 hover:text-violet-400 transition-colors">
+                      amanjain310105@gmail.com
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400">
+                    <Phone className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">Phone</span>
+                    <a href="tel:+918839595077" className="text-sm font-semibold text-zinc-200 hover:text-cyan-400 transition-colors">
+                      +91 88395 95077
+                    </a>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l.3.479-1.002 3.659 3.75-1.001.495.329z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-zinc-400 block tracking-wider">WhatsApp</span>
+                    <a href="https://wa.me/918839595077" target="_blank" rel="noopener noreferrer" className="text-sm font-semibold text-zinc-200 hover:text-emerald-400 transition-colors">
+                      +91 88395 95077
+                    </a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: Contact Form */}
+          <div className="md:col-span-3 premium-card p-8 rounded-3xl bg-[#0c0e1a]/80 border border-white/10">
+            <form onSubmit={handleContactSubmit} className="space-y-6">
+              {submitResult && (
+                <div className={`p-4 rounded-xl text-xs font-bold ${submitResult.success ? 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400' : 'bg-red-500/10 border border-red-500/20 text-red-400'}`}>
+                  {submitResult.message}
+                </div>
+              )}
+
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-2">Your Name</label>
+                <input
+                  type="text"
+                  required
+                  value={contactName}
+                  onChange={(e) => setContactName(e.target.value)}
+                  placeholder="John Doe"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-2">Your Email</label>
+                <input
+                  type="email"
+                  required
+                  value={contactEmail}
+                  onChange={(e) => setContactEmail(e.target.value)}
+                  placeholder="john@example.com"
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-bold text-zinc-300 block mb-2">Message</label>
+                <textarea
+                  required
+                  rows={4}
+                  value={contactMessage}
+                  onChange={(e) => setContactMessage(e.target.value)}
+                  placeholder="Hello Aman, I would like to talk about..."
+                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-sm text-zinc-100 placeholder-zinc-500 focus:outline-none focus:border-violet-500 transition-colors resize-none"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full py-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-violet-600/25 flex items-center justify-center gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer disabled:opacity-50"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" /> Sending Message...
+                  </>
+                ) : (
+                  <>
+                    Send Message <Send className="w-4 h-4" />
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </section>

@@ -30,6 +30,7 @@
 html {
   scroll-behavior: smooth;
   height: 100%;
+  color-scheme: dark;
 }
 
 body {
@@ -38,16 +39,13 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   overflow-x: hidden;
-  background:
-    radial-gradient(circle at 10% 15%, rgba(255, 90, 56, 0.25), transparent 24%),
-    radial-gradient(circle at 88% 10%, rgba(255, 196, 61, 0.2), transparent 22%),
-    radial-gradient(circle at 50% 90%, rgba(139, 92, 246, 0.18), transparent 28%),
-    radial-gradient(circle at 75% 70%, rgba(34, 211, 238, 0.1), transparent 18%),
-    linear-gradient(180deg, #04060f 0%, #060a14 38%, #050816 100%);
+  background: #0f111a;
   background-attachment: fixed;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Custom striped cursor */
+  cursor: url("data:image/svg+xml,%3Csvg width='30' height='36' viewBox='0 0 30 36' xmlns='http://www.w3.org/2000/svg'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='25%25' stop-color='%23c99df0' /%3E%3Cstop offset='25%25' stop-color='white' /%3E%3Cstop offset='32%25' stop-color='white' /%3E%3Cstop offset='32%25' stop-color='%237ecaf3' /%3E%3Cstop offset='65%25' stop-color='%237ecaf3' /%3E%3Cstop offset='65%25' stop-color='white' /%3E%3Cstop offset='72%25' stop-color='white' /%3E%3Cstop offset='72%25' stop-color='%23c99df0' /%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M5 3L24 18L15 20L19 30L14 32L10 22L4 27V3Z' fill='url(%23grad)' stroke='%23222' stroke-width='2.5' stroke-linejoin='round'/%3E%3C/svg%3E") 2 2, auto;
 }
 
 * {
@@ -55,7 +53,7 @@ body {
 }
 
 ::selection {
-  background: rgba(255, 90, 56, 0.38);
+  background: rgba(139, 92, 246, 0.35);
   color: #fff;
 }
 
@@ -71,11 +69,7 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background:
-    linear-gradient(120deg, rgba(255, 255, 255, 0.08), transparent 22%, transparent 78%, rgba(255, 255, 255, 0.05)),
-    radial-gradient(circle at center, transparent 0%, rgba(0, 0, 0, 0.18) 100%);
-  mix-blend-mode: screen;
-  opacity: 0.7;
+  background: transparent;
   z-index: -2;
 }
 
@@ -84,11 +78,8 @@ body {
   position: fixed;
   inset: 0;
   pointer-events: none;
-  background-image: radial-gradient(rgba(255, 255, 255, 0.08) 1px, transparent 1px);
-  background-size: 30px 30px;
-  opacity: 0.12;
+  background-image: transparent;
   z-index: -1;
-  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.95), transparent 96%);
 }
 
 .premium-card {
@@ -258,15 +249,7 @@ body {
 }
 
 .bg-proctor-scanlines {
-  background: linear-gradient(
-    to bottom,
-    rgba(255, 255, 255, 0),
-    rgba(255, 255, 255, 0) 48%,
-    rgba(255, 90, 56, 0.06) 50%,
-    rgba(255, 255, 255, 0) 52%
-  );
-  background-size: 100% 6px;
-  animation: scanlines 18s linear infinite;
+  background: transparent;
 }
 
 @keyframes scanlines {
@@ -312,6 +295,11 @@ select:focus {
   background: rgba(255, 255, 255, 0.08);
 }
 
+option {
+  background-color: #0f111a;
+  color: #fff;
+}
+
 ::-webkit-scrollbar {
   width: 10px;
   height: 10px;
@@ -348,40 +336,15 @@ select:focus {
 }
 
 .cursor-glow {
-  position: fixed;
-  left: var(--mouse-x);
-  top: var(--mouse-y);
-  width: 42rem;
-  height: 42rem;
-  transform: translate(-50%, -50%);
-  background: radial-gradient(circle, rgba(255, 90, 56, 0.18), rgba(255, 196, 61, 0.11), transparent 70%);
-  filter: blur(70px);
-  opacity: 0.75;
-  mix-blend-mode: screen;
-  pointer-events: none;
-  z-index: -1;
-  transition: left 0.06s linear, top 0.06s linear;
+  display: none !important;
 }
 
 .cursor-glow-2 {
-  width: 28rem;
-  height: 28rem;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.18), transparent 70%);
-  opacity: 0.5;
-  animation: floatGlow 10s ease-in-out infinite;
+  display: none;
 }
 
 .cursor-glow-3 {
-  width: 22rem;
-  height: 22rem;
-  background: radial-gradient(circle, rgba(34, 211, 238, 0.12), transparent 70%);
-  opacity: 0.45;
-  animation: floatGlow 14s ease-in-out infinite reverse;
-}
-
-@keyframes floatGlow {
-  0%, 100% { transform: translate(-50%, -50%) translate3d(0, 0, 0); }
-  50% { transform: translate(-50%, -50%) translate3d(30px, -20px, 0); }
+  display: none;
 }
 
 @import "tailwindcss";
