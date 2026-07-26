@@ -9,11 +9,27 @@
 ![Prisma](https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind-v4-06B6D4?style=for-the-badge&logo=tailwindcss)
 
-**A full-stack, enterprise-grade AI technical screening platform with real-time voice streaming, proctoring telemetry, multi-stage prompt orchestration, and out-of-50 standardized scorecards.**
+**An enterprise-grade, real-time AI technical screening platform built with real-time voice streaming, proctoring telemetry, modular prompt state machines, and out-of-50 standardized scorecards.**
 
-[🚀 Live Demo](#) · [🏗️ System Architecture](#-system-architecture--engineering-story) · [🐛 Report Bug](https://github.com/amanjain-31/AI-Interview/issues)
+[🚀 Live Repository](https://github.com/amanjain-31/AI-Interview) · [🏗️ System Architecture](#-system-architecture--engineering-story) · [🧠 Engineering Mindset](#-engineering-mindset-how-i-solve-complex-systems-problems)
 
 </div>
+
+---
+
+## 🧠 Engineering Mindset: How I Solve Complex Systems Problems
+
+> *"As a Systems-Minded Software Engineer, my goal isn't just to write clean UI components—it's to architect resilient, fault-tolerant, and scalable software pipelines that operate deterministically under network instability and high load."* — **Aman Jain**
+
+When engineering **HireAI**, I approached every core requirement by first identifying the underlying system challenges, designing decoupled solutions, and handling edge-case failures:
+
+| System Challenge | Engineering Problem | System Design & Architectural Solution |
+|---|---|---|
+| **Real-Time Voice Streaming** | Network jitter & silent audio drops during candidate answers | Implemented Web Audio API `AnalyserNode` RMS decibel peak verification + continuous STT event loop + duplex WebSocket socket reconnection gateway. |
+| **LLM Reliability & Downtime** | Third-party LLM rate limits (`429 Quota Exceeded`) mid-assessment | Designed a **Fail-Soft Provider Abstraction**: `Gemini 1.5 Flash` ➔ `OpenAI GPT-4o-mini` ➔ `Local Deterministic Mock Engine`. Zero assessment interruption. |
+| **Prompt Engineering & Leaks** | Monolithic prompts hallucinating, leaking code solutions, or ignoring state | Architected a **4-Stage Finite State Machine** (`RESUME_Q` ➔ `SYSTEM_DESIGN` ➔ `BEHAVIORAL` ➔ `CODING`) with isolated prompt templates. |
+| **Subjective Evaluation Bias** | Unstructured text evaluations giving inconsistent ratings | Standardized candidate scoring across **5 independent 10-point dimensions** (50 Pts total) mapped to deterministic hiring recommendations. |
+| **Assessment Integrity** | Candidate cheating via tab switching, copy-pasting, or second screens | Implemented a client-side **Proctor Telemetry Observer** streaming infractions directly to `CheatingEvent` database tables. |
 
 ---
 
@@ -58,6 +74,19 @@ graph TD
         L --> M[(Database: SQLite / PostgreSQL)]
     end
 ```
+
+---
+
+## ⚖️ System Design Trade-Off Matrix
+
+Every system design choice involves explicit trade-offs. Here is the engineering rationale behind HireAI's architectural decisions:
+
+| Architectural Choice | Option Selected | Alternative Considered | Trade-Off Rationale |
+|---|---|---|---|
+| **Real-Time Transport** | **WebSockets (`ws`)** | HTTP Polling / Server-Sent Events | WebSockets provide sub-50ms full-duplex bi-directional streaming necessary for real-time speech dialogue. |
+| **Speech-To-Text (STT)** | **Web Speech API + Audio Analyser** | Server-side Whisper API | In-browser Web Speech API reduces server network overhead to zero while AnalyserNode validates volume decibel peaks locally. |
+| **State Orchestration** | **Finite State Machine** | Single Monolithic Prompt | A 4-phase state machine enforces explicit stage transitions, eliminating prompt drift and preventing solution leaks. |
+| **Database ORM** | **Prisma ORM** | Raw SQL Queries | Prisma provides type-safe schema migrations, transactional guarantees, and seamless portability between SQLite (dev) and PostgreSQL (prod). |
 
 ---
 
@@ -178,6 +207,6 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-Built with ❤️ by **Aman Jain** · [GitHub](https://github.com/amanjain-31)
+Built with ❤️ by **Aman Jain** · Systems-Minded Software Engineer · [GitHub](https://github.com/amanjain-31)
 
 </div>
